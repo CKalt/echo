@@ -1,0 +1,31 @@
+TEST_COUNT=100
+echo Running test. TEST_COUNT=$TEST_COUNT
+echo "Please make sure the echo server is running. (cargo run)."
+echo "This test will run 4 processes that will each count up to "
+echo "TEST_COUT, while writing the "label:count" to the"
+echo "echo server socket."
+
+function check_count {
+    LABEL=$1
+    COUNT=$2
+    if (( COUNT == TEST_COUNT )); then
+        echo "Test ${LABEL} passed."
+    else
+        echo "Test ${LABEL} failed."
+    fi
+}
+
+rm -f log-file; ./echo_counts ${TEST_COUNT} A & \
+               ./echo_counts ${TEST_COUNT} B & \
+               ./echo_counts ${TEST_COUNT} C & \
+               ./echo_counts ${TEST_COUNT} D
+sleep 1
+A_COUNT=$(grep "A:" log-file | wc -l)
+B_COUNT=$(grep "B:" log-file | wc -l)
+C_COUNT=$(grep "C:" log-file | wc -l)
+D_COUNT=$(grep "D:" log-file | wc -l)
+
+check_count A $A_COUNT
+check_count B $B_COUNT
+check_count C $C_COUNT
+check_count D $D_COUNT
